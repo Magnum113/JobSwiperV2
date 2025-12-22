@@ -1,8 +1,6 @@
-// Import the compiled server bundle
-const serverModule = require('../dist/index.cjs');
-
+// Dynamic import for CommonJS module in ES module context
 export default async function handler(req: any, res: any) {
-    // The compiled bundle auto-initializes, just use it
-    // In serverless, we rely on the bundled Express app
+    const serverModule = await import('../dist/index.cjs');
+    // The compiled bundle should export the app
     return serverModule.app(req, res);
 }
