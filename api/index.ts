@@ -1,14 +1,8 @@
-import { app, setupApp } from "../server/index";
-
-let isSetup = false;
+// Import the compiled server bundle
+const serverModule = require('../dist/index.cjs');
 
 export default async function handler(req: any, res: any) {
-    // Initialize app  on first request
-    if (!isSetup) {
-        await setupApp();
-        isSetup = true;
-    }
-
-    // Pass request to Express app
-    return app(req, res);
+    // The compiled bundle auto-initializes, just use it
+    // In serverless, we rely on the bundled Express app
+    return serverModule.app(req, res);
 }
