@@ -21,7 +21,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
-const app = express();
+export const app = express();
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -57,11 +57,11 @@ app.get("/health", (_req, res) => {
 app.get("/", (req, res, next) => {
   const userAgent = req.headers["user-agent"] || "";
   // Respond to Replit health checks and curl/wget probes
-  if (userAgent.includes("kube-probe") || 
-      userAgent.includes("curl") || 
-      userAgent.includes("wget") ||
-      userAgent.includes("Replit") ||
-      !userAgent) {
+  if (userAgent.includes("kube-probe") ||
+    userAgent.includes("curl") ||
+    userAgent.includes("wget") ||
+    userAgent.includes("Replit") ||
+    !userAgent) {
     return res.status(200).send("OK");
   }
   // For browsers, continue to serve SPA
@@ -105,7 +105,8 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
+// Initialize app setup
+async function setupApp() {
   try {
     await registerRoutes(httpServer, app);
 
@@ -126,25 +127,36 @@ app.use((req, res, next) => {
       const { setupVite } = await import("./vite");
       await setupVite(httpServer, app);
     }
-
-    // ALWAYS serve the app on the port specified in the environment variable PORT
-    // Other ports are firewalled. Default to 5000 if not specified.
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = parseInt(process.env.PORT || "5000", 10);
-    httpServer.listen(
-      {
-        port,
-        host: "0.0.0.0",
-        reusePort: true,
-      },
-      () => {
-        log(`serving on port ${port}`);
-        console.log("[Startup] Application startup complete - ready to accept requests");
-      },
-    );
   } catch (err) {
     console.error("[Startup Error]", err);
-    process.exit(1);
+    throw err;
   }
-})();
+}
+
+// Only start server if running directly (not imported)
+if (require.main === module) {
+  (async () => {
+    try {
+      await setupApp();
+
+      const port = parseInt(process.env.PORT || "5000", 10);
+      httpServer.listen(
+        {
+          port,
+          host: "0.0.0.0",
+          reusePort: true,
+        },
+        () => {
+          log(`serving on port ${port}`);
+          console.log("[Startup] Application startup complete - ready to accept requests");
+        },
+      );
+    } catch (err) {
+      console.error("[Startup Error]", err);
+      process.exit(1);
+    }
+  })();
+}
+
+// Export setup function for serverless environments
+export { setupApp };

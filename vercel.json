@@ -1,23 +1,18 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "dist/index.cjs",
-            "use": "@vercel/node"
+            "source": "/assets/(.*)",
+            "destination": "/dist/public/assets/$1"
         },
         {
-            "src": "dist/public/**",
-            "use": "@vercel/static"
+            "source": "/(.*)",
+            "destination": "/api"
         }
     ],
-    "routes": [
-        {
-            "src": "/assets/(.*)",
-            "dest": "/dist/public/assets/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/dist/index.cjs"
+    "functions": {
+        "api/index.ts": {
+            "memory": 1024,
+            "maxDuration": 10
         }
-    ]
+    }
 }
