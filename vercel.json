@@ -1,18 +1,44 @@
 {
-    "rewrites": [
-        {
-            "source": "/assets/(.*)",
-            "destination": "/dist/public/assets/$1"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/api"
-        }
-    ],
-    "functions": {
-        "api/index.ts": {
-            "memory": 1024,
-            "maxDuration": 10
-        }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/assets/:path*",
+      "destination": "/public/assets/:path*"
+    },
+    {
+      "source": "/favicon.png",
+      "destination": "/public/favicon.png"
+    },
+    {
+      "source": "/hh-logo.svg",
+      "destination": "/public/hh-logo.svg"
+    },
+    {
+      "source": "/opengraph.jpg",
+      "destination": "/public/opengraph.jpg"
+    },
+    {
+      "source": "/",
+      "destination": "/public/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/public/index.html"
     }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }
