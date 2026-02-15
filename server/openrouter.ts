@@ -9,6 +9,7 @@ export function getLastOpenRouterPrompt(): string {
 }
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODEL = "stepfun/step-3.5-flash:free";
 
 // ================================
 // MAIN GENERATOR
@@ -99,7 +100,7 @@ ${resume}
         "X-Title": "JobSwipe"
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
+        model: OPENROUTER_MODEL,
         messages: [
           {
             role: "system",
@@ -217,7 +218,7 @@ ${resume.slice(0, 3000)}
         "X-Title": "JobSwipe"
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-20b:free",
+        model: OPENROUTER_MODEL,
         messages: [
           {
             role: "system",
