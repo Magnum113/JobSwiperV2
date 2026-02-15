@@ -3,14 +3,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api",
-      "destination": "/api"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
       "source": "/assets/:path*",
       "destination": "/public/assets/:path*"
     },
@@ -37,6 +29,10 @@
   ],
   "functions": {
     "api/index.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/[...path].ts": {
       "memory": 1024,
       "maxDuration": 10
     }
