@@ -641,7 +641,7 @@ export default function VacanciesPage() {
                 </p>
                 
                 <a
-                  href="/auth/hh/start"
+                  href="/api/auth/hh/start"
                   className="flex items-center justify-center gap-3 w-full py-4 px-6 bg-[#D6001C] hover:bg-[#B8001A] text-white font-semibold rounded-xl shadow-lg shadow-red-500/25 transition-all hover:shadow-xl hover:shadow-red-500/30"
                   data-testid="button-hh-auth"
                 >

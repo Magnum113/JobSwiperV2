@@ -151,7 +151,7 @@ export default function HistoryPage() {
           Для просмотра истории откликов необходимо авторизоваться через hh.ru
         </p>
         <a
-          href="/auth/hh/start"
+          href="/api/auth/hh/start"
           className="flex items-center justify-center gap-3 py-3 px-6 bg-[#D6001C] hover:bg-[#B8001A] text-white font-semibold rounded-xl shadow-lg transition-all"
           data-testid="button-hh-auth-history"
         >

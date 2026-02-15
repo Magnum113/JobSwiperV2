@@ -727,7 +727,7 @@ export async function registerRoutes(
   // =====================================================
 
   // Start OAuth flow - redirect to HH.ru
-  app.get("/auth/hh/start", (req, res) => {
+  app.get(["/auth/hh/start", "/api/auth/hh/start"], (req, res) => {
     try {
       const authUrl = getAuthUrl();
       console.log("[HH OAuth] Redirecting to:", authUrl);
@@ -739,7 +739,7 @@ export async function registerRoutes(
   });
 
   // OAuth callback - exchange code for tokens
-  app.get("/auth/hh/callback", async (req, res) => {
+  app.get(["/auth/hh/callback", "/api/auth/hh/callback"], async (req, res) => {
     try {
       const code = req.query.code as string;
       if (!code) {

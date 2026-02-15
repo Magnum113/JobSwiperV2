@@ -125,7 +125,7 @@ export default function Profile() {
   };
 
   const handleLogin = () => {
-    window.location.href = "/auth/hh/start";
+    window.location.href = "/api/auth/hh/start";
   };
 
   const handleLogout = () => {

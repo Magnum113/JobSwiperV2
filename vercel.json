@@ -11,6 +11,10 @@
       "destination": "/api"
     },
     {
+      "source": "/auth/hh/:path*",
+      "destination": "/api/auth/hh/:path*"
+    },
+    {
       "source": "/assets/:path*",
       "destination": "/public/assets/:path*"
     },

@@ -16,6 +16,13 @@ function AppContent() {
     const userId = params.get("userId");
     const hhAuth = params.get("hhAuth");
     const pathname = window.location.pathname;
+    const search = window.location.search;
+
+    // If SPA fallback captured OAuth path, forward to backend OAuth route.
+    if (pathname.startsWith("/auth/hh/")) {
+      window.location.replace(`/api${pathname}${search}`);
+      return;
+    }
     
     if (userId) {
       localStorage.setItem("userId", userId);
