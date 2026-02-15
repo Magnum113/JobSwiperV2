@@ -11,7 +11,7 @@ export function getRedirectUri(): string {
 
 export function getAuthUrl(): string {
   const redirectUri = encodeURIComponent(getRedirectUri());
-  return `https://hh.ru/oauth/authorize?response_type=code&client_id=${HH_CLIENT_ID}&redirect_uri=${redirectUri}`;
+  return `https://hh.ru/oauth/authorize?response_type=code&client_id=${HH_CLIENT_ID}&redirect_uri=${redirectUri}&role=applicant&force_role=true&skip_choose_account=true`;
 }
 
 export interface TokenResponse {
