@@ -13,6 +13,14 @@ import { CenteredLoader } from "@/components/ui/loader";
 import type { HHJob, HHJobsResponse, Resume, CompatibilityResult } from "@shared/schema";
 
 type AreaOption = { value: string; label: string };
+type CoverLetterResumeSource = "hh" | "manual";
+
+const COVER_LETTER_RESUME_SOURCE_KEY = "coverLetterResumeSource";
+
+function getCoverLetterResumeSource(): CoverLetterResumeSource {
+  const source = localStorage.getItem(COVER_LETTER_RESUME_SOURCE_KEY);
+  return source === "manual" ? "manual" : "hh";
+}
 
 const STATIC_AREAS: AreaOption[] = [
   { value: "1", label: "Москва" },
@@ -107,6 +115,7 @@ async function applyAsync(data: {
   };
   resumeText: string;
   isDemo: boolean;
+  coverLetterResumeSource: CoverLetterResumeSource;
 }): Promise<{ status: string; applicationId: number }> {
   const response = await fetch("/api/apply/async", {
     method: "POST",
@@ -440,6 +449,7 @@ export default function VacanciesPage() {
         },
         resumeText: resumeContent,
         isDemo: !isAuthenticated,
+        coverLetterResumeSource: getCoverLetterResumeSource(),
       }).then(() => {
         // Refresh applications list and pending count
         queryClient.invalidateQueries({ queryKey: ["applications"] });

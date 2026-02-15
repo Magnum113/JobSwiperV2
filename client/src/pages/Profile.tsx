@@ -6,6 +6,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CenteredLoader } from "@/components/ui/loader";
 
+type CoverLetterResumeSource = "hh" | "manual";
+const COVER_LETTER_RESUME_SOURCE_KEY = "coverLetterResumeSource";
+
+function getStoredResumeSource(): CoverLetterResumeSource {
+  const value = localStorage.getItem(COVER_LETTER_RESUME_SOURCE_KEY);
+  return value === "manual" ? "manual" : "hh";
+}
+
 interface ProfileData {
   hhConnected: boolean;
   user: {
@@ -64,6 +72,7 @@ export default function Profile() {
   const [resumeText, setResumeText] = useState("");
   const [saved, setSaved] = useState(false);
   const [userId, setUserId] = useState<string | null>(() => localStorage.getItem("userId"));
+  const [coverLetterResumeSource, setCoverLetterResumeSource] = useState<CoverLetterResumeSource>(() => getStoredResumeSource());
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -148,6 +157,22 @@ export default function Profile() {
     }
   };
 
+  const hhConnected = profile?.hhConnected ?? false;
+  const user = profile?.user;
+  const hhResumes = profile?.hhResumes ?? [];
+  const hhSourceAvailable = hhConnected && hhResumes.length > 0;
+
+  const handleCoverLetterSourceChange = (source: CoverLetterResumeSource) => {
+    setCoverLetterResumeSource(source);
+    localStorage.setItem(COVER_LETTER_RESUME_SOURCE_KEY, source);
+  };
+
+  useEffect(() => {
+    if (!hhSourceAvailable && coverLetterResumeSource === "hh") {
+      handleCoverLetterSourceChange("manual");
+    }
+  }, [hhSourceAvailable, coverLetterResumeSource]);
+
   if (profileLoading) {
     return (
       <div className="relative h-full">
@@ -155,10 +180,6 @@ export default function Profile() {
       </div>
     );
   }
-
-  const hhConnected = profile?.hhConnected ?? false;
-  const user = profile?.user;
-  const hhResumes = profile?.hhResumes ?? [];
 
   return (
     <div className="p-6 pb-24 max-w-lg mx-auto">
@@ -342,6 +363,43 @@ export default function Profile() {
               )}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-2xl border-0 shadow-lg mt-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Источник резюме для сопроводительного письма</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant={coverLetterResumeSource === "hh" ? "default" : "outline"}
+              disabled={!hhSourceAvailable}
+              onClick={() => handleCoverLetterSourceChange("hh")}
+              className="justify-start rounded-xl"
+              data-testid="button-cover-letter-source-hh"
+            >
+              Резюме с hh.ru
+            </Button>
+            <Button
+              type="button"
+              variant={coverLetterResumeSource === "manual" ? "default" : "outline"}
+              onClick={() => handleCoverLetterSourceChange("manual")}
+              className="justify-start rounded-xl"
+              data-testid="button-cover-letter-source-manual"
+            >
+              Ручное резюме из профиля
+            </Button>
+          </div>
+          <p className="text-sm text-gray-500">
+            Сейчас выбрано: {coverLetterResumeSource === "hh" ? "резюме с hh.ru" : "ручное резюме"}.
+          </p>
+          {!hhSourceAvailable && (
+            <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
+              Чтобы использовать резюме с hh.ru для генерации писем, подключите hh.ru и синхронизируйте резюме.
+            </p>
+          )}
         </CardContent>
       </Card>
 

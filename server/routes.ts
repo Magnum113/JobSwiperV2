@@ -1105,7 +1105,8 @@ export async function registerRoutes(
   // Async apply - returns immediately, processes in background
   app.post("/api/apply/async", async (req, res) => {
     try {
-      const { userId, vacancyId, vacancyData, resumeText, isDemo } = req.body;
+      const { userId, vacancyId, vacancyData, resumeText, isDemo, coverLetterResumeSource: coverLetterResumeSourceRaw } = req.body;
+      const coverLetterResumeSource: "hh" | "manual" = coverLetterResumeSourceRaw === "manual" ? "manual" : "hh";
       
       if (!vacancyId) {
         return res.status(400).json({ error: "Vacancy ID required" });
@@ -1161,39 +1162,48 @@ export async function registerRoutes(
               tags: vacancyData?.tags || [],
             } as Job;
             
-            // --- NEW: Get selected resume text ---
-let resumeTextFinal = "";
+            let resumeTextFinal = "";
+            let resumeSourceUsed: "hh" | "manual" = coverLetterResumeSource;
 
-try {
-  const [selectedResume] = await db.select()
-    .from(resumes)
-    .where(and(
-      eq(resumes.userId, userId),
-      eq(resumes.selected, true)
-    ));
+            if (isDemo || !userId) {
+              resumeTextFinal = (resumeText || "").trim();
+              resumeSourceUsed = "manual";
+            } else if (coverLetterResumeSource === "manual") {
+              const manualResume = await storage.getManualResume(userId);
+              resumeTextFinal = (manualResume?.content || "").trim();
 
-  if (selectedResume) {
-    resumeTextFinal = selectedResume.content || "";
-    console.log("🔥 Loaded resume from DB, length:", resumeTextFinal.length);
-  } else {
-    console.log("🔥 No selected resume found");
-  }
-} catch (e) {
-  console.log("🔥 Error loading resume:", e);
-}
-            console.log("\n==================== FULL RESUME DEBUG ====================");
-            console.log("🔥 FULL RESUME — LENGTH:", (resumeText || "").length);
-            console.log("🔥 FULL RESUME — CONTENT BELOW:");
-            console.log("------------------------------------------------------------");
-            console.log(resumeText || "(EMPTY RESUME)");
-            console.log("------------------------------------------------------------");
-            console.log("🔥 FULL VACANCY OBJECT:");
-            console.dir(vacancy, { depth: 5 });
-            console.log("============================================================\n");
+              if (!resumeTextFinal) {
+                const [selectedResume] = await db.select()
+                  .from(resumes)
+                  .where(and(
+                    eq(resumes.userId, userId),
+                    eq(resumes.selected, true)
+                  ));
+                resumeTextFinal = (selectedResume?.content || "").trim();
+                resumeSourceUsed = "hh";
+              }
+            } else {
+              const [selectedResume] = await db.select()
+                .from(resumes)
+                .where(and(
+                  eq(resumes.userId, userId),
+                  eq(resumes.selected, true)
+                ));
+              resumeTextFinal = (selectedResume?.content || "").trim();
 
-            
-// --- Generate cover letter using real resume ---
-coverLetter = await generateCoverLetter(resumeTextFinal, vacancy);
+              if (!resumeTextFinal) {
+                const manualResume = await storage.getManualResume(userId);
+                resumeTextFinal = (manualResume?.content || "").trim();
+                resumeSourceUsed = "manual";
+              }
+            }
+
+            console.log(
+              `[Async Apply] Cover letter resume source requested=${coverLetterResumeSource}, used=${resumeSourceUsed}, length=${resumeTextFinal.length}`
+            );
+
+            // Generate cover letter using chosen source
+            coverLetter = await generateCoverLetter(resumeTextFinal, vacancy);
 
             console.log("[Async Apply] Cover letter generated for app:", pendingApp.id);
           } catch (err) {
